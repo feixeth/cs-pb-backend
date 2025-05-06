@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'username',
+        'avatar'
     ];
 
     /**
@@ -44,5 +46,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    /**
+     * own strategies relation.
+     *
+     * @return array<string, string>
+     */
+    public function strategies()
+    {
+        return $this->hasMany(Strategy::class);
+    }
+
+    /**
+     * stategie's vote relation.
+     *
+     * @return array<string, string>
+     */
+    public function votes()
+    {
+        return $this->hasMany(Vote::class);
     }
 }
