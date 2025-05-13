@@ -18,24 +18,41 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        public function store(Request $request): Response
+        {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255', 'unique:users,name'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->string('password')),
-        ]);
+            try {
+                $user = User::create([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'password' => Hash::make($validated['password']),
+                ]);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'message' => 'Could not create user.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
 
-        event(new Registered($user));
+            // Si pour une raison quelconque l'utilisateur n'a pas été créé
+            if (! $user) {
+                return response()->json([
+                    'message' => 'User creation failed.'
+                ], 500);
+            }
 
-        Auth::login($user);
+            event(new Registered($user));
 
-        return response()->noContent();
-    }
+            Auth::login($user);
+
+            return response()->json([
+                'user' => $user
+            ], 201);
+        }
+
 }

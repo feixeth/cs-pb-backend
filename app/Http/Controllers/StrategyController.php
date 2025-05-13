@@ -24,10 +24,11 @@ class StrategyController extends Controller
             'description' => 'nullable|string',
             'map' => 'nullable|string',
             'type' => 'nullable|string',
-            'is_public' => 'boolean',
+            'is_public' => 'required|boolean',
         ]);
 
         $data['user_id'] = Auth::id();
+        
 
         $strategy = Strategy::create($data);
 
@@ -63,6 +64,23 @@ class StrategyController extends Controller
 
         return response()->json($strategy);
     }
+
+
+
+
+    public function fetchByUserID()
+    {
+        $userId = auth()->id();
+
+        return Strategy::where('user_id', $userId)
+            ->with(['media', 'votes']) // optionnel selon besoin
+            ->withCount(['votes as score' => fn($q) => $q->select(\DB::raw('COALESCE(SUM(value),0)'))])
+            ->latest()
+            ->get();
+    }
+
+
+
 
     public function destroy(Strategy $strategy)
     {

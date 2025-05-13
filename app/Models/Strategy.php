@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Strategy extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'description', 'map', 'type', 'is_public', 'slug'
+        'user_id', 'title', 'description', 'map', 'type', 'slug', 'is_public'
     ];
 
+    protected $casts = [
+        'is_public' => 'boolean',
+    ];
     protected static function booted()
     {
         static::creating(function ($strategy) {
