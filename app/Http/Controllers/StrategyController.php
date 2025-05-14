@@ -24,15 +24,33 @@ class StrategyController extends Controller
             'description' => 'nullable|string',
             'map' => 'nullable|string',
             'type' => 'nullable|string',
-            'is_public' => 'required|boolean',
+            'is_public' => 'boolean',
+            'players' => 'array',
+            'players.*.position' => 'required|integer',
+            'players.*.role' => 'nullable|string',
+            'players.*.tasks' => 'nullable|string',
+            'lineups' => 'array',
+            'lineups.*.title' => 'required|string',
+            'lineups.*.image' => 'nullable|string',
         ]);
-
-        $data['user_id'] = Auth::id();
         
-
+        $data['user_id'] = Auth::id();
         $strategy = Strategy::create($data);
-
-        return response()->json($strategy, 201);
+        if (isset($data['players'])) {
+            $strategy->players()->createMany($data['players']);
+        }
+    
+        if (isset($data['lineups'])) {
+            $strategy->lineups()->createMany($data['lineups']);
+        }
+    
+        return response()->json(
+            $strategy->load(['user', 'media', 'players', 'lineups'])
+                ->loadCount([
+                    'votes as score' => fn($q) => $q->select(\DB::raw('COALESCE(SUM(value),0)'))
+                ]),
+            201
+        );
     }
 
     public function show(Strategy $strategy)
@@ -41,9 +59,12 @@ class StrategyController extends Controller
             abort(403);
         }
 
-        return $strategy->load(['user', 'media'])->loadCount([
-            'votes as score' => fn($q) => $q->select(\DB::raw('COALESCE(SUM(value),0)'))
+        return $strategy
+            ->load(['user', 'media', 'players', 'lineups'])
+            ->loadCount([
+                'votes as score' => fn($q) => $q->select(\DB::raw('COALESCE(SUM(value),0)'))
         ]);
+    
     }
 
     public function update(Request $request, Strategy $strategy)

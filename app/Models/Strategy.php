@@ -43,4 +43,15 @@ class Strategy extends Model
     {
         return $this->votes()->sum('value');
     }
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function lineups()
+    {
+        return $this->hasMany(Lineup::class);
+    }
+
 }

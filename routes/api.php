@@ -16,7 +16,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [UserController::class, 'me']);
     Route::post('/me/profile', [UserController::class, 'updateProfile']);
     
-    Route::apiResource('strategies', StrategyController::class);
+    Route::post('/strategies', [StrategyController::class, 'store']);
+    Route::put('/strategies/{strategy}', [StrategyController::class, 'update']);
+    Route::delete('/strategies/{strategy}', [StrategyController::class, 'destroy']);
+
     Route::post('/strategies/{strategy}/vote', [VoteController::class, 'store']);
     Route::get('/my-strategies', [StrategyController::class, 'fetchByUserId']);
     Route::delete('/strategies/{strategy}/vote', [VoteController::class, 'destroy']);
@@ -26,5 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-// ✅ Route publique pour accéder aux stratégies visibles
+// ✅ Route publique 
 Route::get('/strategies', [StrategyController::class, 'index']);
+Route::get('/strategies/{strategy}', [StrategyController::class, 'show']);
