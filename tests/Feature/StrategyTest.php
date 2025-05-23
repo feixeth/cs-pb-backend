@@ -10,6 +10,9 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
+
+
+
 it('can list public strategies', function () {
     Strategy::factory()->create(['is_public' => true]);
     Strategy::factory()->create(['is_public' => false]);
@@ -19,6 +22,9 @@ it('can list public strategies', function () {
     $response->assertOk();
     $response->assertJsonCount(1);
 });
+
+
+
 
 it('can create a strategy', function () {
     $data = [
@@ -35,6 +41,9 @@ it('can create a strategy', function () {
     $response->assertJsonFragment(['title' => 'Dust2 Smoke']);
     $this->assertDatabaseHas('strategies', ['title' => 'Dust2 Smoke']);
 });
+
+
+
 
 it('can show a public strategy', function () {
     $strategy = Strategy::factory()->create(['is_public' => true]);
@@ -56,6 +65,9 @@ it('cannot show a private strategy of another user', function () {
     $response->assertForbidden();
 });
 
+
+
+
 it('can update own strategy', function () {
     $strategy = Strategy::factory()->create(['user_id' => $this->user->id]);
 
@@ -66,6 +78,10 @@ it('can update own strategy', function () {
     $response->assertOk();
     $response->assertJsonFragment(['title' => 'Updated Title']);
 });
+
+
+
+
 
 it('cannot update strategy of another user', function () {
     $otherUser = User::factory()->create();
@@ -78,6 +94,9 @@ it('cannot update strategy of another user', function () {
     $response->assertForbidden();
 });
 
+
+
+
 it('can delete own strategy', function () {
     $strategy = Strategy::factory()->create(['user_id' => $this->user->id]);
 
@@ -87,6 +106,10 @@ it('can delete own strategy', function () {
     $this->assertDatabaseMissing('strategies', ['id' => $strategy->id]);
 });
 
+
+
+
+
 it('cannot delete strategy of another user', function () {
     $otherUser = User::factory()->create();
     $strategy = Strategy::factory()->create(['user_id' => $otherUser->id]);
@@ -94,4 +117,64 @@ it('cannot delete strategy of another user', function () {
     $response = $this->deleteJson("/api/strategies/{$strategy->id}");
 
     $response->assertForbidden();
+});
+
+it('prevents guest from creating a strategy', function () {
+
+    auth()->logout(); //  on force la déco a cause du beforeach au dessus 
+    $payload = [
+        'title' => 'Test strat',
+        'type' => 'execute',
+        'map' => 'de_dust2',
+    ];
+
+    $response = $this->postJson('/api/strategies', $payload);
+
+    $response->assertUnauthorized(); // 401
+});
+
+
+
+
+test('it prevents guest from updating a strategy', function () {
+    $strategy = Strategy::factory()->create();
+
+    $this->putJson("/api/strategies/{$strategy->id}", [
+        'title' => 'Hack Attempt',
+    ])->assertUnauthorized();
+});
+
+test('it prevents guest from deleting a strategy', function () {
+    $strategy = Strategy::factory()->create();
+
+    $this->deleteJson("/api/strategies/{$strategy->id}")
+        ->assertUnauthorized();
+});
+
+test('it lists only own strategies in /my-strategies', function () {
+    $user = User::factory()->create();
+    Strategy::factory()->count(2)->create(['user_id' => $user->id]);
+    Strategy::factory()->count(3)->create(); // other users
+
+    $this->actingAs($user)->getJson('/api/my-strategies')
+        ->assertOk()
+        ->assertJsonCount(2);
+});
+
+test('it prevents guest from accessing /my-strategies', function () {
+    $this->getJson('/api/my-strategies')->assertUnauthorized();
+});
+
+it('prevents viewing private strategy from another user', function () {
+    $owner = \App\Models\User::factory()->create();
+    $strat = \App\Models\Strategy::factory()->for($owner)->create([
+        'is_public' => false,
+    ]);
+
+    $viewer = \App\Models\User::factory()->create();
+    $this->actingAs($viewer);
+
+    $response = $this->getJson("/api/strategies/{$strat->id}");
+
+    $response->assertForbidden(); // 403 ou 404 selon ta politique
 });

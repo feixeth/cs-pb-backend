@@ -25,6 +25,25 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
+
+it('returns the authenticated user profile', function () {
+    $user = \App\Models\User::factory()->create([
+        'username' => 'Coucou'
+    ]);
+
+    $this->actingAs($user);
+
+    $response = $this->getJson('/api/user');
+
+    $response->assertOk();
+    $response->assertJsonFragment([
+        'username' => 'Coucou'
+    ]);
+});
+
+
+
+
 test('users can logout', function () {
     $user = User::factory()->create();
 

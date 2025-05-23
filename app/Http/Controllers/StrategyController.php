@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class StrategyController extends Controller
 {
+
     public function index()
     {
         return Strategy::where('is_public', true)
