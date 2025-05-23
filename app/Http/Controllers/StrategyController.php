@@ -20,6 +20,7 @@ class StrategyController extends Controller
 
     public function store(Request $request)
     {
+        
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -70,10 +71,14 @@ class StrategyController extends Controller
 
     public function update(Request $request, Strategy $strategy)
     {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
         if ($strategy->user_id !== Auth::id()) {
             abort(403);
         }
-
+    
         $data = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -81,11 +86,12 @@ class StrategyController extends Controller
             'type' => 'nullable|string',
             'is_public' => 'boolean',
         ]);
-
+    
         $strategy->update($data);
-
+    
         return response()->json($strategy);
     }
+    
 
 
 
@@ -106,6 +112,15 @@ class StrategyController extends Controller
 
     public function destroy(Strategy $strategy)
     {
+
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        if ($strategy->user_id !== Auth::id()) {
+            abort(403);
+        }
+        
         if ($strategy->user_id !== Auth::id()) {
             abort(403);
         }

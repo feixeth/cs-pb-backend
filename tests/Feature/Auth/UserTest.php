@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 test('it returns the authenticated user\'s profile', function () {
     $user = User::factory()->create();
     

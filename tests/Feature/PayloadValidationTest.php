@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 test('it correctly saves players and lineups when creating a strategy', function () {
     $user = User::factory()->create();
     $payload = [

@@ -6,6 +6,7 @@ use App\Models\Strategy;
 use App\Models\Vote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 
 class VoteController extends Controller
 {

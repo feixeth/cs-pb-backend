@@ -133,10 +133,8 @@ it('prevents guest from creating a strategy', function () {
     $response->assertUnauthorized(); // 401
 });
 
-
-
-
 test('it prevents guest from updating a strategy', function () {
+    auth()->logout();
     $strategy = Strategy::factory()->create();
 
     $this->putJson("/api/strategies/{$strategy->id}", [
@@ -145,6 +143,7 @@ test('it prevents guest from updating a strategy', function () {
 });
 
 test('it prevents guest from deleting a strategy', function () {
+    auth()->logout();
     $strategy = Strategy::factory()->create();
 
     $this->deleteJson("/api/strategies/{$strategy->id}")
@@ -162,6 +161,7 @@ test('it lists only own strategies in /my-strategies', function () {
 });
 
 test('it prevents guest from accessing /my-strategies', function () {
+    auth()->logout();
     $this->getJson('/api/my-strategies')->assertUnauthorized();
 });
 
@@ -176,5 +176,5 @@ it('prevents viewing private strategy from another user', function () {
 
     $response = $this->getJson("/api/strategies/{$strat->id}");
 
-    $response->assertForbidden(); // 403 ou 404 selon ta politique
+    $response->assertForbidden();
 });

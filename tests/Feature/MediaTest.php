@@ -1,5 +1,11 @@
 <?php
 
+use App\Models\User;
+use App\Models\Strategy;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+
+
 test('it can upload media to a strategy (auth only)', function () {
     Storage::fake('public');
     $user = User::factory()->create();

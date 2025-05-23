@@ -46,7 +46,7 @@ it('can update a vote', function () {
 
 test('it prevents guest from voting', function () {
     $strategy = Strategy::factory()->create();
-
+    auth()->logout();
     $this->postJson("/api/strategies/{$strategy->id}/vote", [
         'value' => 1
     ])->assertUnauthorized();
@@ -54,7 +54,7 @@ test('it prevents guest from voting', function () {
 
 test('it prevents guest from deleting a vote', function () {
     $strategy = Strategy::factory()->create();
-
+    auth()->logout();
     $this->deleteJson("/api/strategies/{$strategy->id}/vote")
         ->assertUnauthorized();
 });
