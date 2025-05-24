@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Strategy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StrategyController extends Controller
 {
 
+    use HasFactory;
+    
     public function index()
     {
         return Strategy::where('is_public', true)
